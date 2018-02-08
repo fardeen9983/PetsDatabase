@@ -16,23 +16,31 @@
 package com.example.android.pets;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
+
+import com.example.android.pets.data.PetsDBManager;
+import com.example.android.pets.data.PetsContract.petsTable;
 
 /**
  * Displays list of pets that were entered and stored in the app.
  */
 public class CatalogActivity extends AppCompatActivity {
 
+    public TextView textView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
 
+        textView =findViewById(R.id.text_view_pet);
         // Setup FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -42,6 +50,8 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        PetsDBManager petsDBManager = new PetsDBManager(this);
+        displayDatabaseInfo(petsDBManager);
     }
 
     @Override
@@ -66,5 +76,12 @@ public class CatalogActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void displayDatabaseInfo(PetsDBManager petsDBManager){
+        SQLiteDatabase sqLiteDatabase = petsDBManager.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ petsTable.TABLE_NAME + ";",null);
+        textView.setText("Current rows in the " + petsTable.TABLE_NAME + " table : " + cursor.getCount());
+        cursor.close();
     }
 }
