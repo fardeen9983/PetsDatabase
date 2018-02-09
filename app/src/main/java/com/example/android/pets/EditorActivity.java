@@ -148,6 +148,7 @@ public class EditorActivity extends AppCompatActivity {
         PetsDBManager petsDBManager = new PetsDBManager(this);
         SQLiteDatabase db = petsDBManager.getWritableDatabase();
         db.insert(petsTable.TABLE_NAME,null,values);
+
         NavUtils.navigateUpFromSameTask(this);
     }
 }
