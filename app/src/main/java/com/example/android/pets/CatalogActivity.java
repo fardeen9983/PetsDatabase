@@ -17,6 +17,7 @@ package com.example.android.pets;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -73,6 +74,7 @@ public class CatalogActivity extends AppCompatActivity {
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
                 // Do nothing for now
+                deleteAllData();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -83,5 +85,11 @@ public class CatalogActivity extends AppCompatActivity {
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM "+ petsTable.TABLE_NAME + ";",null);
         textView.setText("Current rows in the " + petsTable.TABLE_NAME + " table : " + cursor.getCount());
         cursor.close();
+    }
+
+    private void deleteAllData(){
+        PetsDBManager petsDBManager = new PetsDBManager(this);
+        PetsDBManager.deleteAllData(petsDBManager.getWritableDatabase());
+        displayDatabaseInfo(petsDBManager);
     }
 }

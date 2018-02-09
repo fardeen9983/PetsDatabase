@@ -3,10 +3,8 @@ package com.example.android.pets.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.print.PrintManager;
 
 import com.example.android.pets.data.PetsContract.petsTable;
-
 
 
 public class PetsDBManager extends SQLiteOpenHelper {
@@ -30,7 +28,8 @@ public class PetsDBManager extends SQLiteOpenHelper {
                     + petsTable.COLUMN_PET_WEIGHT + CONSTRAINT_NOT_NULL + " );";
 
     private static final String DELETE_TABLE =
-            "DELETE FROM IF EXISTS " + petsTable.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + petsTable.TABLE_NAME + " ;";
+
     public PetsDBManager(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -44,6 +43,11 @@ public class PetsDBManager extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(DELETE_TABLE);
         onCreate(db);
+    }
+
+    public static void deleteAllData(SQLiteDatabase db) {
+        db.execSQL(DELETE_TABLE);
+        db.execSQL(CREATE_TABLE);
     }
 
 }
