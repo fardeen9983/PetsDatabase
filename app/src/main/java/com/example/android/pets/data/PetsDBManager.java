@@ -7,9 +7,7 @@ import android.print.PrintManager;
 
 import com.example.android.pets.data.PetsContract.petsTable;
 
-/**
- * Created by LUCIFER on 09-02-2018.
- */
+
 
 public class PetsDBManager extends SQLiteOpenHelper {
 
@@ -47,4 +45,5 @@ public class PetsDBManager extends SQLiteOpenHelper {
         db.execSQL(DELETE_TABLE);
         onCreate(db);
     }
+
 }

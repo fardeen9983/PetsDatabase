@@ -15,6 +15,8 @@
  */
 package com.example.android.pets;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -26,12 +28,15 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import com.example.android.pets.data.PetsContract.petsTable;
+import com.example.android.pets.data.PetsDBManager;
 
 /**
  * Allows user to create a new pet or edit an existing one.
  */
 public class EditorActivity extends AppCompatActivity {
 
+    private ContentValues values;
     /** EditText field to enter the pet's name */
     private EditText mNameEditText;
 
@@ -56,10 +61,10 @@ public class EditorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_editor);
 
         // Find all relevant views that we will need to read user input from
-        mNameEditText = (EditText) findViewById(R.id.edit_pet_name);
-        mBreedEditText = (EditText) findViewById(R.id.edit_pet_breed);
-        mWeightEditText = (EditText) findViewById(R.id.edit_pet_weight);
-        mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
+        mNameEditText = findViewById(R.id.edit_pet_name);
+        mBreedEditText =  findViewById(R.id.edit_pet_breed);
+        mWeightEditText = findViewById(R.id.edit_pet_weight);
+        mGenderSpinner =  findViewById(R.id.spinner_gender);
 
         setupSpinner();
     }
@@ -118,6 +123,7 @@ public class EditorActivity extends AppCompatActivity {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
                 // Do nothing for now
+                insertRowIntoDB();
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
@@ -130,5 +136,18 @@ public class EditorActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void insertRowIntoDB(){
+        values = new ContentValues();
+        values.put(petsTable.COLUMN_PET_NAME,mNameEditText.getText().toString());
+        values.put(petsTable.COLUMN_PET_BREED,mBreedEditText.getText().toString());
+        values.put(petsTable.COLUMN_PET_GENDER,mGender);
+        values.put(petsTable.COLUMN_PET_WEIGHT,mWeightEditText.getText().toString());
+
+        PetsDBManager petsDBManager = new PetsDBManager(this);
+        SQLiteDatabase db = petsDBManager.getWritableDatabase();
+        db.insert(petsTable.TABLE_NAME,null,values);
+        NavUtils.navigateUpFromSameTask(this);
     }
 }
