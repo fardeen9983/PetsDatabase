@@ -9,7 +9,7 @@ import com.example.android.pets.data.PetsContract.petsTable;
 
 public class PetsDBManager extends SQLiteOpenHelper {
 
-    private final static String DATABASE_NAME = "pets";
+    private final static String DATABASE_NAME = "pet";
     private final static int DATABASE_VERSION = 1;
     private final static String TEXT_TYPE = " TEXT ";
     private final static String INTEGER_TYPE = " INTEGER ";
@@ -25,7 +25,7 @@ public class PetsDBManager extends SQLiteOpenHelper {
                     + petsTable.COLUMN_PET_NAME + TEXT_TYPE + CONSTRAINT_NOT_NULL + ", "
                     + petsTable.COLUMN_PET_BREED + TEXT_TYPE + CONSTRAINT_NOT_NULL + ", "
                     + petsTable.COLUMN_PET_GENDER + INTEGER_TYPE + CONSTRAINT_DEFAULT_VALUE + CONSTRAINT_NOT_NULL + ", "
-                    + petsTable.COLUMN_PET_WEIGHT + CONSTRAINT_NOT_NULL + " );";
+                    + petsTable.COLUMN_PET_WEIGHT + INTEGER_TYPE + CONSTRAINT_NOT_NULL + " );";
 
     private static final String DELETE_TABLE =
             "DROP TABLE IF EXISTS " + petsTable.TABLE_NAME + " ;";

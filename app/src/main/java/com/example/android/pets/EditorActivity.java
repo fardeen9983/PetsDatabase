@@ -18,6 +18,7 @@ package com.example.android.pets;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -28,6 +29,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
+
 import com.example.android.pets.data.PetsContract.petsTable;
 import com.example.android.pets.data.PetsDBManager;
 
@@ -140,15 +143,21 @@ public class EditorActivity extends AppCompatActivity {
 
     public void insertRowIntoDB(){
         values = new ContentValues();
-        values.put(petsTable.COLUMN_PET_NAME,mNameEditText.getText().toString());
-        values.put(petsTable.COLUMN_PET_BREED,mBreedEditText.getText().toString());
+        values.put(petsTable.COLUMN_PET_NAME,mNameEditText.getText().toString().trim());
+        values.put(petsTable.COLUMN_PET_BREED,mBreedEditText.getText().toString().trim());
         values.put(petsTable.COLUMN_PET_GENDER,mGender);
-        values.put(petsTable.COLUMN_PET_WEIGHT,mWeightEditText.getText().toString());
+        String weight = mWeightEditText.getText().toString().trim();
+        int Weight = Integer.parseInt(weight);
+        values.put(petsTable.COLUMN_PET_WEIGHT,Weight);
 
         PetsDBManager petsDBManager = new PetsDBManager(this);
         SQLiteDatabase db = petsDBManager.getWritableDatabase();
-        db.insert(petsTable.TABLE_NAME,null,values);
+        long id = db.insert(petsTable.TABLE_NAME,null,values);
 
+        if(id!=-1)
+        Toast.makeText(this, "New Pet details added with id : " + id, Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(this, "Error with insertion", Toast.LENGTH_SHORT).show();
         NavUtils.navigateUpFromSameTask(this);
     }
 }
