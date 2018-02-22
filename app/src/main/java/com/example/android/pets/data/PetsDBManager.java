@@ -23,7 +23,7 @@ public class PetsDBManager extends SQLiteOpenHelper {
             "CREATE TABLE " + petsTable.TABLE_NAME + " ( "
                     + petsTable.COLUMN_PET_ID + INTEGER_TYPE + CONSTRAINT_PRIMARY_KEY + CONSTRAINT_AUTO_INCREMENT + ", "
                     + petsTable.COLUMN_PET_NAME + TEXT_TYPE + CONSTRAINT_NOT_NULL + ", "
-                    + petsTable.COLUMN_PET_BREED + TEXT_TYPE + CONSTRAINT_NOT_NULL + ", "
+                    + petsTable.COLUMN_PET_BREED + TEXT_TYPE +  ", "
                     + petsTable.COLUMN_PET_GENDER + INTEGER_TYPE + CONSTRAINT_DEFAULT_VALUE + CONSTRAINT_NOT_NULL + ", "
                     + petsTable.COLUMN_PET_WEIGHT + INTEGER_TYPE + CONSTRAINT_NOT_NULL + " );";
 

@@ -16,6 +16,7 @@
 package com.example.android.pets;
 
 import android.content.Intent;
+import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -39,12 +40,15 @@ import java.util.ArrayList;
  */
 public class CatalogActivity extends AppCompatActivity {
 
-    private SQLiteDatabase petDBR,petDBW;
+    private SQLiteDatabase petDBR, petDBW;
     private PetsDBManager petsDBManager;
     private ListView listView;
     private ArrayAdapter<PetDetail> petAdapter;
     private TextView textView;
     private ArrayList<PetDetail> petDetails;
+    private String selection = petsTable.COLUMN_PET_ID + " >?";
+    private String[] selectionArgs = {"3"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,8 +94,22 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     public void displayDatabaseInfo() {
-        Cursor cursor = petDBR.rawQuery("SELECT * FROM " + petsTable.TABLE_NAME + ";", null);
-        textView.setText("Current rows in the " + petsTable.TABLE_NAME + " table : " + cursor.getCount());
+        Cursor cursor = petDBR.query(petsTable.TABLE_NAME, null, null, null, null, null, null);
+        StringBuilder builder = new StringBuilder();
+        int i, j, col = cursor.getColumnCount(), count = cursor.getCount();
+
+        for (j = 0; j < col; j++)
+            builder.append(cursor.getColumnName(j) + " ");
+        if (cursor.moveToFirst()) {
+            do {
+                i = cursor.getPosition();
+                builder.append("\n");
+                for (j = 0; j < col; j++)
+                    builder.append(cursor.getString(j) + " ");
+            } while (cursor.moveToNext());
+        }
+
+        textView.setText("Current rows in the " + petsTable.TABLE_NAME + " table : " + cursor.getCount() + "\n" + builder.toString());
         cursor.close();
     }
 
@@ -100,10 +118,10 @@ public class CatalogActivity extends AppCompatActivity {
         displayDatabaseInfo();
     }
 
-    public void init(){
+    public void init() {
         Cursor cursor = petDBW.rawQuery("SELECT * FROM " + petsTable.TABLE_NAME + ";", null);
         int i = cursor.getCount();
-        for (int j =0;j<i;j++){
+        for (int j = 0; j < i; j++) {
         }
         cursor.close();
     }
