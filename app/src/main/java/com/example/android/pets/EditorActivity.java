@@ -39,17 +39,26 @@ import com.example.android.pets.data.PetsDBManager;
  */
 public class EditorActivity extends AppCompatActivity {
 
+    private int id = -1;
     private ContentValues values;
-    /** EditText field to enter the pet's name */
+    /**
+     * EditText field to enter the pet's name
+     */
     private EditText mNameEditText;
 
-    /** EditText field to enter the pet's breed */
+    /**
+     * EditText field to enter the pet's breed
+     */
     private EditText mBreedEditText;
 
-    /** EditText field to enter the pet's weight */
+    /**
+     * EditText field to enter the pet's weight
+     */
     private EditText mWeightEditText;
 
-    /** EditText field to enter the pet's gender */
+    /**
+     * EditText field to enter the pet's gender
+     */
     private Spinner mGenderSpinner;
 
     /**
@@ -65,11 +74,21 @@ public class EditorActivity extends AppCompatActivity {
 
         // Find all relevant views that we will need to read user input from
         mNameEditText = findViewById(R.id.edit_pet_name);
-        mBreedEditText =  findViewById(R.id.edit_pet_breed);
+        mBreedEditText = findViewById(R.id.edit_pet_breed);
         mWeightEditText = findViewById(R.id.edit_pet_weight);
-        mGenderSpinner =  findViewById(R.id.spinner_gender);
+        mGenderSpinner = findViewById(R.id.spinner_gender);
 
         setupSpinner();
+
+        PetDetail petDetail = (PetDetail) getIntent().getSerializableExtra("pet");
+        if (petDetail != null) {
+            mNameEditText.setText(petDetail.getName());
+            mBreedEditText.setText(petDetail.getBreed());
+            mWeightEditText.setText(petDetail.getWeight() + "");
+
+            id = petDetail.get_id();
+        }
+
     }
 
     /**
@@ -131,6 +150,12 @@ public class EditorActivity extends AppCompatActivity {
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
                 // Do nothing for now
+                if (id != -1) {
+                    PetsDBManager petsDBManager = new PetsDBManager(this);
+                    SQLiteDatabase database = petsDBManager.getWritableDatabase();
+                    database.execSQL("DELETE FROM " + petsTable.TABLE_NAME + " WHERE " + petsTable.COLUMN_PET_ID + " IS " + id + " ;");
+                    NavUtils.navigateUpFromSameTask(this);
+                }
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -141,21 +166,21 @@ public class EditorActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void insertRowIntoDB(){
+    public void insertRowIntoDB() {
         values = new ContentValues();
-        values.put(petsTable.COLUMN_PET_NAME,mNameEditText.getText().toString().trim());
-        values.put(petsTable.COLUMN_PET_BREED,mBreedEditText.getText().toString().trim());
-        values.put(petsTable.COLUMN_PET_GENDER,mGender);
+        values.put(petsTable.COLUMN_PET_NAME, mNameEditText.getText().toString().trim());
+        values.put(petsTable.COLUMN_PET_BREED, mBreedEditText.getText().toString().trim());
+        values.put(petsTable.COLUMN_PET_GENDER, mGender);
         String weight = mWeightEditText.getText().toString().trim();
         int Weight = Integer.parseInt(weight);
-        values.put(petsTable.COLUMN_PET_WEIGHT,Weight);
+        values.put(petsTable.COLUMN_PET_WEIGHT, Weight);
 
         PetsDBManager petsDBManager = new PetsDBManager(this);
         SQLiteDatabase db = petsDBManager.getWritableDatabase();
-        long id = db.insert(petsTable.TABLE_NAME,null,values);
+        long id = db.insert(petsTable.TABLE_NAME, null, values);
 
-        if(id!=-1)
-        Toast.makeText(this, "New Pet details added with id : " + id, Toast.LENGTH_SHORT).show();
+        if (id != -1)
+            Toast.makeText(this, "New Pet details added with id : " + id, Toast.LENGTH_SHORT).show();
         else
             Toast.makeText(this, "Error with insertion", Toast.LENGTH_SHORT).show();
         NavUtils.navigateUpFromSameTask(this);

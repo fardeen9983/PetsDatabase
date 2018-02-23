@@ -16,9 +16,7 @@
 package com.example.android.pets;
 
 import android.content.Intent;
-import android.database.CharArrayBuffer;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -26,9 +24,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.pets.data.PetsDBManager;
 import com.example.android.pets.data.PetsContract.petsTable;
@@ -43,22 +44,28 @@ public class CatalogActivity extends AppCompatActivity {
     private SQLiteDatabase petDBR, petDBW;
     private PetsDBManager petsDBManager;
     private ListView listView;
-    private ArrayAdapter<PetDetail> petAdapter;
-    private TextView textView;
+    private TextView empty_listview;
+    private String[] projection = {petsTable.COLUMN_PET_ID,petsTable.COLUMN_PET_NAME,petsTable.COLUMN_PET_BREED};
+    private String selection = null;
+    private String[] selectionArgs = null;
+
+    //List
+    private PetDetail petDetail;
     private ArrayList<PetDetail> petDetails;
-    private String selection = petsTable.COLUMN_PET_ID + " >?";
-    private String[] selectionArgs = {"3"};
+    private ArrayAdapter<PetDetail> petDetailArrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
 
+        petDetail = new PetDetail();
+
         petsDBManager = new PetsDBManager(this);
         petDBR = petsDBManager.getReadableDatabase();
         petDBW = petsDBManager.getWritableDatabase();
         listView = findViewById(R.id.list_view);
-        textView = findViewById(R.id.text_view_pet);
+        empty_listview = findViewById(R.id.text_view_pet);
         // Setup FAB to open EditorActivity
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -94,23 +101,25 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     public void displayDatabaseInfo() {
-        Cursor cursor = petDBR.query(petsTable.TABLE_NAME, null, null, null, null, null, null);
-        StringBuilder builder = new StringBuilder();
-        int i, j, col = cursor.getColumnCount(), count = cursor.getCount();
-
-        for (j = 0; j < col; j++)
-            builder.append(cursor.getColumnName(j) + " ");
+        Cursor cursor = petDBR.query(petsTable.TABLE_NAME, null,null,null, null, null, null);
+        petDetails = new ArrayList<>();
+        int i=0,j;
         if (cursor.moveToFirst()) {
             do {
-                i = cursor.getPosition();
-                builder.append("\n");
-                for (j = 0; j < col; j++)
-                    builder.append(cursor.getString(j) + " ");
+                petDetail = new PetDetail();
+                i=0;
+                petDetail.set_id(cursor.getInt(i++));
+                petDetail.setName(cursor.getString(i++));
+                petDetail.setBreed(cursor.getString(i++));
+                petDetail.setGender(cursor.getInt(i++));
+                petDetail.setWeight(cursor.getInt(i));
+
+                petDetails.add(petDetail);
+
             } while (cursor.moveToNext());
         }
-
-        textView.setText("Current rows in the " + petsTable.TABLE_NAME + " table : " + cursor.getCount() + "\n" + builder.toString());
         cursor.close();
+        setList();
     }
 
     private void deleteAllData() {
@@ -124,5 +133,19 @@ public class CatalogActivity extends AppCompatActivity {
         for (int j = 0; j < i; j++) {
         }
         cursor.close();
+    }
+
+    void setList(){
+        petDetailArrayAdapter = new PetAdpater(this,petDetails);
+        listView.setAdapter(petDetailArrayAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getApplicationContext(), EditorActivity.class);
+                petDetail = petDetailArrayAdapter.getItem(position);
+                intent.putExtra("pet",petDetail);
+                startActivity(intent);
+            }
+        });
     }
 }
