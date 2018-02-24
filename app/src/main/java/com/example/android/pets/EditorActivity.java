@@ -85,7 +85,7 @@ public class EditorActivity extends AppCompatActivity {
             mNameEditText.setText(petDetail.getName());
             mBreedEditText.setText(petDetail.getBreed());
             mWeightEditText.setText(petDetail.getWeight() + "");
-
+            getSupportActionBar().setTitle("Edit Details");
             id = petDetail.get_id();
         }
 
@@ -179,9 +179,9 @@ public class EditorActivity extends AppCompatActivity {
         SQLiteDatabase db = petsDBManager.getWritableDatabase();
         long id = db.insert(petsTable.TABLE_NAME, null, values);
 
-        if (id != -1)
+        if (id != -1) {
             Toast.makeText(this, "New Pet details added with id : " + id, Toast.LENGTH_SHORT).show();
-        else
+        } else
             Toast.makeText(this, "Error with insertion", Toast.LENGTH_SHORT).show();
         NavUtils.navigateUpFromSameTask(this);
     }

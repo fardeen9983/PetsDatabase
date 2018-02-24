@@ -124,6 +124,10 @@ public class CatalogActivity extends AppCompatActivity {
 
     private void deleteAllData() {
         PetsDBManager.deleteAllData(petDBW);
+        petDetails.clear();
+        petDetails.notifyAll();
+        petDetailArrayAdapter.clear();
+        petDetailArrayAdapter.notifyDataSetChanged();
         displayDatabaseInfo();
     }
 
