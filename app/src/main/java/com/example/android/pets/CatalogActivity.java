@@ -18,9 +18,13 @@ package com.example.android.pets;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,20 +49,23 @@ public class CatalogActivity extends AppCompatActivity {
     private PetsDBManager petsDBManager;
     private ListView listView;
     private TextView empty_listview;
-    private String[] projection = {petsTable.COLUMN_PET_ID,petsTable.COLUMN_PET_NAME,petsTable.COLUMN_PET_BREED};
+    private String[] projection = {petsTable.COLUMN_PET_ID, petsTable.COLUMN_PET_NAME, petsTable.COLUMN_PET_BREED};
     private String selection = null;
     private String[] selectionArgs = null;
+    private final String TAG = getClass().getSimpleName();
 
     //List
     private PetDetail petDetail;
     private ArrayList<PetDetail> petDetails;
-    private ArrayAdapter<PetDetail> petDetailArrayAdapter;
+    public static PetAdpater petDetailArrayAdapter;
+
+    private Cursor cursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
-
+        Log.v(TAG, "onCreate called");
         petDetail = new PetDetail();
 
         petsDBManager = new PetsDBManager(this);
@@ -75,9 +82,17 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        init();
         displayDatabaseInfo();
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getApplicationContext(), EditorActivity.class);
+                petDetail = (PetDetail) petDetailArrayAdapter.getItem(position);
+                intent.putExtra("pet", petDetail);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -101,55 +116,50 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     public void displayDatabaseInfo() {
-        Cursor cursor = petDBR.query(petsTable.TABLE_NAME, null,null,null, null, null, null);
-        petDetails = new ArrayList<>();
-        int i=0,j;
-        if (cursor.moveToFirst()) {
-            do {
-                petDetail = new PetDetail();
-                i=0;
-                petDetail.set_id(cursor.getInt(i++));
-                petDetail.setName(cursor.getString(i++));
-                petDetail.setBreed(cursor.getString(i++));
-                petDetail.setGender(cursor.getInt(i++));
-                petDetail.setWeight(cursor.getInt(i));
-
-                petDetails.add(petDetail);
-
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        setList();
+        Log.v(TAG, "display function called");
+        PetAsynLoadDetails petAsynLoadDetails = new PetAsynLoadDetails();
+        petAsynLoadDetails.execute();
+        Log.v(TAG, "blah blah");
     }
 
     private void deleteAllData() {
         PetsDBManager.deleteAllData(petDBW);
         petDetails.clear();
-        petDetails.notifyAll();
-        petDetailArrayAdapter.clear();
         petDetailArrayAdapter.notifyDataSetChanged();
         displayDatabaseInfo();
     }
 
-    public void init() {
-        Cursor cursor = petDBW.rawQuery("SELECT * FROM " + petsTable.TABLE_NAME + ";", null);
-        int i = cursor.getCount();
-        for (int j = 0; j < i; j++) {
-        }
-        cursor.close();
-    }
+    private class PetAsynLoadDetails extends AsyncTask<Void, Void, Void> {
 
-    void setList(){
-        petDetailArrayAdapter = new PetAdpater(this,petDetails);
-        listView.setAdapter(petDetailArrayAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getApplicationContext(), EditorActivity.class);
-                petDetail = petDetailArrayAdapter.getItem(position);
-                intent.putExtra("pet",petDetail);
-                startActivity(intent);
+        @Override
+        protected Void doInBackground(Void... voids) {
+            cursor = petDBR.query(petsTable.TABLE_NAME, null, null, null, null, null, null);
+            petDetails = new ArrayList<>();
+            int i = 0, j;
+            if (cursor.moveToFirst()) {
+                do {
+                    petDetail = new PetDetail();
+                    i = 0;
+                    petDetail.set_id(cursor.getInt(i++));
+                    petDetail.setName(cursor.getString(i++));
+                    petDetail.setBreed(cursor.getString(i++));
+                    petDetail.setGender(cursor.getInt(i++));
+                    petDetail.setWeight(cursor.getInt(i));
+
+                    petDetails.add(petDetail);
+
+                } while (cursor.moveToNext());
             }
-        });
+            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            petDetailArrayAdapter = new PetAdpater(CatalogActivity.this, cursor, true);
+            listView.setAdapter(petDetailArrayAdapter);
+        }
     }
 }
